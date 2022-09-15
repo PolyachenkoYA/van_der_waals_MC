@@ -1,0 +1,7 @@
+# ninja log v5
+2574	2698	1663210137191966058	VdW.so.cpython-38-x86_64-linux-gnu.so	38b7472d0f86b43a
+1	3034	1663209263341782742	CMakeFiles/van_der_waals_Cmodule.dir/VdW.cpp.o	529cc5bed07ab994
+0	2750	1663207865186303058	CMakeFiles/VdW.so.dir/VdW_py.cpp.o	28620a36d1a78b13
+1	2574	1663210137063966227	CMakeFiles/VdW.so.dir/VdW.cpp.o	3c7916786a8dc494
+3034	3136	1663209263445782708	van_der_waals_Cmodule	f0bd3680b324dd29
+0	1604	1663208957885883678	CMakeFiles/van_der_waals_Cmodule.dir/main.cpp.o	84ccf8c5b2c57fbd
