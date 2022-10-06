@@ -19,7 +19,8 @@ int main(int argc, char** argv) {
 //    int verbose = atoi(argv[9]);
 //    int my_seed = atoi(argv[10]);
 
-	double L;
+	double Lx, Ly, Lz;
+	double gen_density;
 	double Temp;
 	double lmd;
 	double dl;
@@ -29,24 +30,30 @@ int main(int argc, char** argv) {
 	int to_remember_timeevol;
 	int verbose;
 	int my_seed;
+	int timestep_to_save_E;
 
 	verbose = 2;
 	my_seed = 2;
 
-	L = 20;   // [sgm]
+	Lx = 5;   // [sgm]
+	Ly = 5;
+	Lz = 15;
 	Temp = 0.5;   // [eps]
 	lmd = 2;   // [sgm]
 	dl = 0.1;   // [sgm]
 	N_atoms = VdW::powi(5, 3);
-	init_gen_mode = gen_mode_ID_cubic_lattice;
+	init_gen_mode = gen_mode_ID_solidUvacuum;
+	gen_density = 1.0;
 	to_remember_timeevol = 1;
 	Nt_max = 1000;
+	timestep_to_save_E = 100;
 
 	// for valgrind
 	Nt_max = 1000;
 	
     int i, j;
 	long OP_arr_len = 128;
+	int N_E_saved = 0;
 
 	double *E;
 	int *biggest_cluster_sizes;
@@ -60,12 +67,18 @@ int main(int argc, char** argv) {
 //    printf("1: %d\n", VdW::get_seed_C());
 
 	long Nt = 0;
+	double L[3];
+	L[0] = Lx;
+	L[1] = Ly;
+	L[2] = Lz;
 
 //	VdW::run_FFS_C(&flux0, &d_flux0, L, Temp, h, states, N_init_states,
 //			  Nt, to_remember_timeevol ? &OP_arr_len : nullptr, OP_interfaces, N_OP_interfaces,
 //			  probs, d_probs, &E, &M, &biggest_cluster_sizes, verbose, init_gen_mode,
 //			  interface_mode, def_spin_state);
-	VdW::run_bruteforce_C(L, Temp, lmd, dl, N_atoms, Nt_max, init_gen_mode, &OP_arr_len, &Nt, &E, &biggest_cluster_sizes, verbose);
+	VdW::run_bruteforce_C(L, Temp, lmd, dl, N_atoms, Nt_max, init_gen_mode, gen_density,
+						  timestep_to_save_E, &N_E_saved, &OP_arr_len,
+						  &Nt, &E, &biggest_cluster_sizes, verbose);
 
     if(to_remember_timeevol){
 		free(E);   // the pointer to the array

@@ -1,4 +1,4 @@
-/home/ypolyach/clion-2020.3.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/home/ypolyach/clion-2020.3.2/bin/ninja/linux/ninja -G Ninja -S /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule -B /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
+/home/ypolyach/clion-2020.3.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/home/ypolyach/clion-2020.3.2/bin/ninja/linux/ninja -G Ninja -S /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule -B /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
 -- The C compiler identification is GNU 9.4.0
 -- The CXX compiler identification is GNU 9.4.0
 -- Detecting C compiler ABI info
@@ -19,4 +19,4 @@
 -- LTO enabled
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
+-- Build files have been written to: /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release

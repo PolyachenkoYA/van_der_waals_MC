@@ -61,7 +61,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /home/ypolyach/clion-2020.3.2/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule -B/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
+  command = /home/ypolyach/clion-2020.3.2/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule -B/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
   description = Re-running CMake...
   generator = 1
 

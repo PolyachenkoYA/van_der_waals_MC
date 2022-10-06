@@ -32,15 +32,19 @@ PYBIND11_MODULE(VdW, m)
 //						 std::optional<int> _to_remember_timeevol, std::optional<int> _verbose, int gen_mode)
 	m.def("run_bruteforce", &run_bruteforce,
 		  "run Brute-force simulation for the 3D VdW gas for Nt_max steps",
-		  py::arg("L"),
+		  py::arg("Lx"),
+		  py::arg("Ly"),
+		  py::arg("Lz"),
 		  py::arg("N_atoms"),
 		  py::arg("Temp"),
 		  py::arg("lmd"),
 		  py::arg("dl"),
 		  py::arg("Nt_max"),
+		  py::arg("timestep_to_save_E"),
 		  py::arg("to_remember_timeevol")=py::none(),
 		  py::arg("verbose")=py::none(),
-		  py::arg("gen_mode")=gen_mode_ID_cubic_lattice
+		  py::arg("gen_mode")=gen_mode_ID_cubic_lattice,
+		  py::arg("gen_density")=py::none()
 	);
 
 //// py::tuple cluster_state(py::array_t<int> state, int default_state)
@@ -67,4 +71,20 @@ PYBIND11_MODULE(VdW, m)
 	m.def("get_seed", &get_seed,
 		  "Returns the current seed used for the last GSL random initiation"
 	);
+
+//	py::int_ get_gen_mode_ID_random();
+	m.def("get_gen_mode_ID_random", &get_gen_mode_ID_random,
+		  "Returns the gen_mode_ID_random"
+	);
+
+//	py::int_ get_gen_mode_ID_cubic_lattice();
+	m.def("get_gen_mode_ID_cubic_lattice", &get_gen_mode_ID_cubic_lattice,
+		  "Returns the gen_mode_ID_cubic_lattice"
+	);
+
+//	py::int_ get_gen_mode_ID_solidUvacuum();
+	m.def("get_gen_mode_ID_solidUvacuum", &get_gen_mode_ID_solidUvacuum,
+		  "Returns the gen_mode_ID_solidUvacuum"
+	);
+
 }

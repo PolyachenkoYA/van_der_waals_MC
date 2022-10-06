@@ -58,8 +58,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release",
-		"source" : "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule"
+		"build" : "/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release",
+		"source" : "/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule"
 	},
 	"version" : 
 	{

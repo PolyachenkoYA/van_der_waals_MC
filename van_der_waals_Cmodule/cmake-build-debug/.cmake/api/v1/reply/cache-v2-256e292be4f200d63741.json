@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-debug"
+			"value" : "/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -591,7 +591,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule"
+			"value" : "/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1162,42 +1162,6 @@
 			"value" : "1"
 		},
 		{
-			"name" : "Izing_BINARY_DIR",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Value Computed by CMake"
-				}
-			],
-			"type" : "STATIC",
-			"value" : "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-debug"
-		},
-		{
-			"name" : "Izing_IS_TOP_LEVEL",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Value Computed by CMake"
-				}
-			],
-			"type" : "STATIC",
-			"value" : "ON"
-		},
-		{
-			"name" : "Izing_SOURCE_DIR",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Value Computed by CMake"
-				}
-			],
-			"type" : "STATIC",
-			"value" : "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule"
-		},
-		{
 			"name" : "PYBIND11_LTO_CXX_FLAGS",
 			"properties" : 
 			[
@@ -1310,18 +1274,6 @@
 			"value" : "general;m;general;gsl;general;gslcblas;general;crypt;general;pthread;general;dl;general;util;general;rt;general;python3.8;"
 		},
 		{
-			"name" : "izing.so_LIB_DEPENDS",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Dependencies for the target"
-				}
-			],
-			"type" : "STATIC",
-			"value" : "general;m;general;gsl;general;gslcblas;general;crypt;general;pthread;general;dl;general;util;general;rt;general;python3.8;"
-		},
-		{
 			"name" : "pybind11_DIR",
 			"properties" : 
 			[
@@ -1343,7 +1295,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-debug"
+			"value" : "/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-debug"
 		},
 		{
 			"name" : "van_der_waals_Cmodule_IS_TOP_LEVEL",
@@ -1367,7 +1319,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule"
+			"value" : "/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule"
 		}
 	],
 	"kind" : "cache",

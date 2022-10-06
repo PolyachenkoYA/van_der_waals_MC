@@ -39,7 +39,7 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release/
+cmake_ninja_workdir = /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release/
 # =============================================================================
 # Object build statements for EXECUTABLE target van_der_waals_Cmodule
 
@@ -49,7 +49,7 @@ cmake_ninja_workdir = /home/ypolyach/!Princeton/courses/phase_transitions/van_de
 
 build cmake_object_order_depends_target_van_der_waals_Cmodule: phony || CMakeFiles/van_der_waals_Cmodule.dir
 
-build CMakeFiles/van_der_waals_Cmodule.dir/main.cpp.o: CXX_COMPILER__van_der_waals_Cmodule_Release /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/main.cpp || cmake_object_order_depends_target_van_der_waals_Cmodule
+build CMakeFiles/van_der_waals_Cmodule.dir/main.cpp.o: CXX_COMPILER__van_der_waals_Cmodule_Release /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/main.cpp || cmake_object_order_depends_target_van_der_waals_Cmodule
   DEP_FILE = CMakeFiles/van_der_waals_Cmodule.dir/main.cpp.o.d
   FLAGS = -Wall -Wextra -O3 -std=gnu++17
   INCLUDES = -I/home/ypolyach/anaconda3/include -I/home/ypolyach/anaconda3/include/python3.8
@@ -58,7 +58,7 @@ build CMakeFiles/van_der_waals_Cmodule.dir/main.cpp.o: CXX_COMPILER__van_der_waa
   TARGET_COMPILE_PDB = CMakeFiles/van_der_waals_Cmodule.dir/
   TARGET_PDB = van_der_waals_Cmodule.pdb
 
-build CMakeFiles/van_der_waals_Cmodule.dir/VdW.cpp.o: CXX_COMPILER__van_der_waals_Cmodule_Release /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/VdW.cpp || cmake_object_order_depends_target_van_der_waals_Cmodule
+build CMakeFiles/van_der_waals_Cmodule.dir/VdW.cpp.o: CXX_COMPILER__van_der_waals_Cmodule_Release /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/VdW.cpp || cmake_object_order_depends_target_van_der_waals_Cmodule
   DEP_FILE = CMakeFiles/van_der_waals_Cmodule.dir/VdW.cpp.o.d
   FLAGS = -Wall -Wextra -O3 -std=gnu++17
   INCLUDES = -I/home/ypolyach/anaconda3/include -I/home/ypolyach/anaconda3/include/python3.8
@@ -95,7 +95,7 @@ build van_der_waals_Cmodule: CXX_EXECUTABLE_LINKER__van_der_waals_Cmodule_Releas
 
 build cmake_object_order_depends_target_VdW.so: phony || CMakeFiles/VdW.so.dir
 
-build CMakeFiles/VdW.so.dir/VdW.cpp.o: CXX_COMPILER__VdW.2eso_Release /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/VdW.cpp || cmake_object_order_depends_target_VdW.so
+build CMakeFiles/VdW.so.dir/VdW.cpp.o: CXX_COMPILER__VdW.2eso_Release /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/VdW.cpp || cmake_object_order_depends_target_VdW.so
   DEFINES = -DVdW_so_EXPORTS
   DEP_FILE = CMakeFiles/VdW.so.dir/VdW.cpp.o.d
   FLAGS = -Wall -Wextra -O3 -fPIC -fvisibility=hidden -flto -fno-fat-lto-objects -std=gnu++17
@@ -105,7 +105,7 @@ build CMakeFiles/VdW.so.dir/VdW.cpp.o: CXX_COMPILER__VdW.2eso_Release /home/ypol
   TARGET_COMPILE_PDB = CMakeFiles/VdW.so.dir/
   TARGET_PDB = VdW.so.pdb
 
-build CMakeFiles/VdW.so.dir/VdW_py.cpp.o: CXX_COMPILER__VdW.2eso_Release /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/VdW_py.cpp || cmake_object_order_depends_target_VdW.so
+build CMakeFiles/VdW.so.dir/VdW_py.cpp.o: CXX_COMPILER__VdW.2eso_Release /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/VdW_py.cpp || cmake_object_order_depends_target_VdW.so
   DEFINES = -DVdW_so_EXPORTS
   DEP_FILE = CMakeFiles/VdW.so.dir/VdW_py.cpp.o.d
   FLAGS = -Wall -Wextra -O3 -fPIC -fvisibility=hidden -flto -fno-fat-lto-objects -std=gnu++17
@@ -128,7 +128,7 @@ build VdW.so.cpython-38-x86_64-linux-gnu.so: CXX_MODULE_LIBRARY_LINKER__VdW.2eso
   LINK_LIBRARIES = -Wl,-rpath,/home/ypolyach/anaconda3/lib  -flto  -lm  -lgsl  -lgslcblas  -lcrypt  -lpthread  -ldl  -lutil  -lrt  -lpython3.8
   LINK_PATH = -L/home/ypolyach/anaconda3/lib
   OBJECT_DIR = CMakeFiles/VdW.so.dir
-  POST_BUILD = cd /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release && /usr/bin/strip /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release/VdW.so.cpython-38-x86_64-linux-gnu.so
+  POST_BUILD = cd /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release && /usr/bin/strip /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release/VdW.so.cpython-38-x86_64-linux-gnu.so
   PRE_LINK = :
   TARGET_COMPILE_PDB = CMakeFiles/VdW.so.dir/
   TARGET_FILE = VdW.so.cpython-38-x86_64-linux-gnu.so
@@ -139,7 +139,7 @@ build VdW.so.cpython-38-x86_64-linux-gnu.so: CXX_MODULE_LIBRARY_LINKER__VdW.2eso
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release && /home/ypolyach/clion-2020.3.2/bin/cmake/linux/bin/ccmake -S/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule -B/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
+  COMMAND = cd /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release && /home/ypolyach/clion-2020.3.2/bin/cmake/linux/bin/ccmake -S/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule -B/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -151,7 +151,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release && /home/ypolyach/clion-2020.3.2/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule -B/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
+  COMMAND = cd /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release && /home/ypolyach/clion-2020.3.2/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule -B/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -169,7 +169,7 @@ build VdW.so: phony VdW.so.cpython-38-x86_64-linux-gnu.so
 # =============================================================================
 
 #############################################
-# Folder: /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
+# Folder: /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release
 
 build all: phony van_der_waals_Cmodule VdW.so.cpython-38-x86_64-linux-gnu.so
 

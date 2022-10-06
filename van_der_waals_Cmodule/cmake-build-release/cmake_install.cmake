@@ -1,4 +1,4 @@
-# Install script for directory: /home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule
+# Install script for directory: /home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ypolyach/!Princeton/courses/phase_transitions/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/ypolyach/!Princeton/van_der_waals_MC/van_der_waals_Cmodule/cmake-build-release/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

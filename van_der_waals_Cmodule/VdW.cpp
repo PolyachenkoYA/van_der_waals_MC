@@ -30,9 +30,25 @@ py::int_ get_seed()
 
 py::int_ set_verbose(int new_verbose)
 {
-	VdW::verbose_dafault = new_verbose;
+	VdW::verbose_default = new_verbose;
 	return 0;
 }
+
+py::int_ get_gen_mode_ID_random()
+{
+	return gen_mode_ID_random;
+}
+
+py::int_ get_gen_mode_ID_cubic_lattice()
+{
+	return gen_mode_ID_cubic_lattice;
+}
+
+py::int_ get_gen_mode_ID_solidUvacuum()
+{
+	return gen_mode_ID_solidUvacuum;
+}
+
 
 //py::tuple cluster_state(py::array_t<int> state, int default_state, std::optional<int> _verbose)
 //{
@@ -44,7 +60,7 @@ py::int_ set_verbose(int new_verbose)
 //	int L = lround(sqrt(L2));
 //	assert(L * L == L2);   // check for the full square
 //
-//	int verbose = (_verbose.has_value() ? _verbose.value() : VdW::verbose_dafault);
+//	int verbose = (_verbose.has_value() ? _verbose.value() : VdW::verbose_default);
 //	if(verbose > 5){
 //		VdW::print_S(state_ptr, L, 'i');
 //	}
@@ -70,112 +86,134 @@ py::int_ set_verbose(int new_verbose)
 //	return py::make_tuple(cluster_element_inds, cluster_sizes);
 //}
 
-py::tuple run_bruteforce(double L, int N_atoms, double Temp, double lmd, double dl, long Nt_max,
-						 std::optional<int> _to_remember_timeevol, std::optional<int> _verbose, int gen_mode)
+py::tuple run_bruteforce(double Lx, double Ly, double Lz, int N_atoms, double Temp, double lmd, double dl, long Nt_max, int timestep_to_save_E,
+						 std::optional<int> _to_remember_timeevol, std::optional<int> _verbose, int gen_mode, std::optional<double> _gen_density)
 {
 	int i, j;
 //	double V = VdW::powi(L, dim);
 
 // -------------- check input ----------------
-	assert(L > 0);
+	double N_linear = pow(N_atoms, 1.0/dim);
+	double rho = N_atoms / (Lx * Ly * Lz);
+	int N_linear_int = int(round(N_linear) + 0.1);
+
+	assert(Lx > 0);
+	assert(Ly > 0);
+	assert(Lz > 0);
 	assert(Temp > 0);
 	assert(lmd  > 0);
-	assert((gen_mode == gen_mode_ID_cubic_lattice) || (gen_mode == gen_mode_ID_random));
-	int verbose = (_verbose.has_value() ? _verbose.value() : VdW::verbose_dafault);
+	assert((gen_mode == gen_mode_ID_cubic_lattice) || (gen_mode == gen_mode_ID_random) || (gen_mode == gen_mode_ID_solidUvacuum));
+	int verbose = (_verbose.has_value() ? _verbose.value() : VdW::verbose_default);
 	int to_remember_timeevol = (_to_remember_timeevol.has_value() ? _to_remember_timeevol.value() : 1);
+	double gen_density = (_gen_density.has_value() ? _gen_density.value() : rho);
+	if((!_gen_density.has_value()) && (gen_mode == gen_mode_ID_solidUvacuum)){
+		printf("WARNING: solid with fixed rho is requested, but no rho provided. Will use rho = N/V.\n");
+	}
 
-	double N_linear = pow(N_atoms, 1.0/dim);
-	int N_linear_int = int(round(N_linear) + 0.1);
-	if(VdW::powi(N_linear_int, dim) != N_atoms){
-		printf("WARNING: N_atoms is not a cube of an integer, the filling will not be uniform\n");
+	double Lz_init_solid = N_atoms / (gen_density * Lx * Ly);
+	double a_lattice = pow(1.0 / gen_density, 1.0/dim);
+	int N_x_layers_init = int(round(Lx / a_lattice) + 0.1);
+	int N_y_layers_init = int(round(Ly / a_lattice) + 0.1);
+	int N_z_layers_init = int(round(Lz_init_solid / a_lattice) + 0.1);
+	if(gen_mode == gen_mode_ID_cubic_lattice){
+		if(VdW::powi(N_linear_int, dim) != N_atoms){
+			printf("WARNING: N_atoms is not a cube of an integer, the filling will not be uniform\n");
+		}
+	} else if(gen_mode == gen_mode_ID_solidUvacuum){
+		if(N_z_layers_init * N_x_layers_init * N_y_layers_init != N_atoms){
+			printf("WARNING: N_atoms does not properly fit into the given box, the solid interface will be not perfect\n");
+		}
 	}
 
 // ----------------- create return objects --------------
 	long Nt = 0;
 	long OP_arr_len = 128;   // the initial value that will be doubling when necessary
+	int N_E_saved = 0;
+	double L[3];
+	L[0] = Lx;
+	L[1] = Ly;
+	L[2] = Lz;
 
 	double *_E;
 	int *_biggest_cluster_sizes;
+	double *_saved_states;
 	if(to_remember_timeevol){
 		_E = (double*) malloc(sizeof(double) * OP_arr_len);
 		_biggest_cluster_sizes = (int*) malloc(sizeof(int) * OP_arr_len);
+		_saved_states = (double*) malloc(sizeof(double)*dim * N_atoms * OP_arr_len);
 	}
 
-	VdW::run_bruteforce_C(L, Temp, lmd, dl, N_atoms, Nt_max, gen_mode,
+	VdW::run_bruteforce_C(L, Temp, lmd, dl, N_atoms, Nt_max, gen_mode, gen_density, timestep_to_save_E, &N_E_saved,
 							to_remember_timeevol ? &OP_arr_len : nullptr,
-							&Nt, &_E, &_biggest_cluster_sizes, verbose);
+							&Nt, &_E, &_biggest_cluster_sizes, &_saved_states, verbose);
 
-	int N_last_elements_to_print = std::min(Nt, (long)10);
+	int N_last_elements_to_print = std::min(N_E_saved, 10);
 
 	py::array_t<double> E;
 	py::array_t<int> biggest_cluster_sizes;
+	py::array_t<double> saved_states;
 	if(to_remember_timeevol){
 		if(verbose >= 2){
 			printf("Brute-force core done, Nt = %ld\n", Nt);
-			VdW::print_E(&(_E[Nt - N_last_elements_to_print]), N_last_elements_to_print, 'F');
+			VdW::print_E(&(_E[N_E_saved - N_last_elements_to_print]), N_last_elements_to_print, 'F');
 //			VdW::print_biggest_cluster_sizes(&(_M[Nt - N_last_elements_to_print]), N_last_elements_to_print, 'F');
 		}
 
-		E = py::array_t<double>(Nt);
+		E = py::array_t<double>(N_E_saved);
 		py::buffer_info E_info = E.request();
 		double *E_ptr = static_cast<double *>(E_info.ptr);
-		memcpy(E_ptr, _E, sizeof(double) * Nt);
+		memcpy(E_ptr, _E, sizeof(double) * N_E_saved);
 		free(_E);
 
-		biggest_cluster_sizes = py::array_t<int>(Nt);
+		biggest_cluster_sizes = py::array_t<int>(N_E_saved);
 		py::buffer_info biggest_cluster_sizes_info = biggest_cluster_sizes.request();
 		int *biggest_cluster_sizes_ptr = static_cast<int *>(biggest_cluster_sizes_info.ptr);
-		memcpy(biggest_cluster_sizes_ptr, _biggest_cluster_sizes, sizeof(int) * Nt);
+		memcpy(biggest_cluster_sizes_ptr, _biggest_cluster_sizes, sizeof(int) * N_E_saved);
 		free(_biggest_cluster_sizes);
+
+		saved_states = py::array_t<double>(N_E_saved * dim * N_atoms);
+		py::buffer_info saved_states_info = saved_states.request();
+		double *saved_states_ptr = static_cast<double *>(saved_states_info.ptr);
+		memcpy(saved_states_ptr, _saved_states, sizeof(double) * N_E_saved * dim * N_atoms);
+		free(_saved_states);
 
 		if(verbose >= 2){
 			printf("internal memory for EM freed\n");
-			VdW::print_E(&(E_ptr[Nt - N_last_elements_to_print]), N_last_elements_to_print, 'P');
+			VdW::print_E(&(E_ptr[N_E_saved - N_last_elements_to_print]), N_last_elements_to_print, 'P');
 			printf("exiting py::run_bruteforce\n");
 		}
 
 	}
 
-	return py::make_tuple(E, biggest_cluster_sizes);
+	return py::make_tuple(saved_states, E, biggest_cluster_sizes);
 }
 
 namespace VdW
 {
     gsl_rng *rng;
     int seed;
-    int verbose_dafault;
+    int verbose_default;
 
 	double md(double x, double L){ return x >= 0 ? (x < L ? x : x - L) : (L + x); }   // x mod L for x \in (-L;2L)
 	double md_dx(double x, double R){ return x >= -R ? (x < R ? x : x - 2*R) : (2*R + x); }   // x mod L for x \in (-L;2L)
-	void md_3D(double *X, double L){ crd3D_loop X[_ix] = md(X[_ix], L); }
-	void md_dx_3D(double *X, double L){ crd3D_loop X[_ix] = md_dx(X[_ix], L); }
+	void md_3D(double *X, const double *L){ crd3D_loop X[_ix] = md(X[_ix], L[_ix]); }
+	void md_dx_3D(double *X, const double *L){ crd3D_loop X[_ix] = md_dx(X[_ix], L[_ix]); }
 	void add_to_3D(double *X, const double *Y){ crd3D_loop X[_ix] += Y[_ix]; }
 	void add_to_3D(double *X, double a){ crd3D_loop X[_ix] += a; }
 	void substract_from_3D(double *X, const double *Y){ crd3D_loop X[_ix] -= Y[_ix]; }
 	void mult_by_3D(double *X, double a){ crd3D_loop X[_ix] *= a; }
-	void get_random_3D_point(double *X, double L){ crd3D_loop X[_ix] = gsl_rng_uniform(rng) * L; }
+	void get_random_3D_point(double *X, const double *L){ crd3D_loop X[_ix] = gsl_rng_uniform(rng) * L[_ix]; }
 	void assign_to_3D(double *X, const double *Y){ memcpy(X, Y, sizeof(double ) * dim); }
-	double dist2(const double *X1, const double *X2, double R, int m){
+	double dist2(const double *X1, const double *X2, const double *R){
 		double r2 = 0;
-		if(m == 0) {
-			crd3D_loop r2 += sqr(md_dx(X1[_ix] - X2[_ix], R));
-		} else {
-			double dr2;
-			double dx;
-			crd3D_loop {
-				dx = md_dx(X1[_ix] - X2[_ix], R);
-				printf("dx_%d = %lf\n", _ix, dx);
-//				dr2 = sqr(dx);
-				r2 += dx*dx;
-			}
-		}
+		crd3D_loop r2 += sqr(md_dx(X1[_ix] - X2[_ix], R[_ix]));
 		return r2;
 	}
 	double u_fnc(double r2, double lmd2){ return r2 < 1 ? 1e100 : (r2 < lmd2 ? -1 : 0); }
 
-	int run_bruteforce_C(double L, double Temp, double lmd, double dl, int N_atoms, long Nt_max, int gen_mode,
-						 long *OP_arr_len, long *Nt, double **E, int **biggest_cluster_sizes,
-						 int verbose)
+	int run_bruteforce_C(const double *L, double Temp, double lmd, double dl, int N_atoms, long Nt_max, int gen_mode,
+						 double gen_density, int timestep_to_save_E, int* N_E_saved, long *OP_arr_len, long *Nt,
+						 double **E, int **biggest_cluster_sizes, double **saved_states, int verbose)
 	{
 //		double V = powi(L, dim);
 		double lmd2 = sqr(lmd);
@@ -187,15 +225,18 @@ namespace VdW
 
 		double *X = (double*) malloc(sizeof(double) * dim * N_atoms);
 
-		generate_state(X, L, N_atoms, gen_mode, verbose);
+		generate_state(X, L, N_atoms, gen_mode, gen_density, verbose);
 //		print_state(X, N_atoms, '0'); 		getchar();
 		if(verbose){
-			printf("running brute-force:\nL=%lf  T=%lf  lmd=%lf, dl=%lf  Nt_max=%ld  gen_mode=%d  verbose=%d  save_E=%d  save_CS=%d  to_resize_time_array=%d\n", L, Temp, lmd, dl, Nt_max, gen_mode, verbose, bool(E), bool(biggest_cluster_sizes), bool(OP_arr_len));
+			printf("running brute-force:\nL=(%lf, %lf, %lf)  T=%lf  lmd=%lf, dl=%lf  Nt_max=%ld  gen_mode=%d  verbose=%d  save_E=%d  save_CS=%d  to_resize_time_array=%d\n", L[0], L[1], L[2], Temp, lmd, dl, Nt_max, gen_mode, verbose, bool(E), bool(biggest_cluster_sizes), bool(OP_arr_len));
 		}
 
+//		print_state(X, N_atoms, 'i');
+
+		*N_E_saved = 0;
 		while(1){
-			run_state(X, L, Temp, lmd2, dl * 2, N_atoms,
-					  E, biggest_cluster_sizes, cluster_element_inds, cluster_sizes,
+			run_state(X, L, Temp, lmd2, dl * 2, N_atoms, timestep_to_save_E, N_E_saved,
+					  E, biggest_cluster_sizes, saved_states, cluster_element_inds, cluster_sizes,
 					  is_checked, Nt, OP_arr_len, verbose, Nt_max);
 			// dl*2 because run_state uses dx \in [-dl/2; dl/2]
 
@@ -219,14 +260,16 @@ namespace VdW
 		return 0;
 	}
 
-	int run_state(double *X, double L, double Temp, double lmd2, double dl, int N_atoms,
-				  double **E, int **biggest_cluster_sizes,
+	int run_state(double *X, const double *L, double Temp, double lmd2, double dl, int N_atoms,
+				  int timestep_to_save_E, int* N_E_saved, double **E, int **biggest_cluster_sizes, double **saved_states,
 				  int *cluster_element_inds, int *cluster_sizes, int *is_checked, long *Nt, long *OP_arr_len,
 				  int verbose, long Nt_max)
 	{
 		int N_clusters_current = N_atoms;   // so that all uninitialized cluster_sizes are set to 0
 		int biggest_cluster_sizes_current = 0;
-		double R = L / 2;
+		double R[3];
+		assign_to_3D(R, L);
+		mult_by_3D(R, 0.5);
 		double E_current = comp_E(X, R, lmd2, N_atoms); // remember the 1st energy;
 //		bool verbose_BF = (verbose < 0);
 //		if(verbose_BF) verbose = -verbose;
@@ -247,28 +290,6 @@ namespace VdW
 		while(1){
 			// ----------- choose which to flip -----------
 			dE = flip_random_particle(X, L, R, lmd2, dl, Temp, N_atoms, &i_atom);
-//			if(dist2(&(X[52 * dim]), &(X[36 * dim]), L) < 1){
-//				printf("Nt=%ld, i_atom=%d, dE=%lf, d2=%lf\n", *Nt, i_atom, dE, dist2(&(X[52 * dim]), &(X[36 * dim]), L));
-//			}
-//			if(*Nt > 11392){
-//				printf("Nt=%ld, i_atom=%d, dE=%lf, d2=%lf\n", *Nt, i_atom, dE, dist2(&(X[52 * dim]), &(X[36 * dim]), L/2, 1));
-//				print_X(&(X[52 * dim]));
-//				print_X(&(X[36 * dim]));
-//			}
-//
-//			if(dE < -N_atoms){
-//				printf("Nt=%ld, dE=%lf, N_atoms=%d\n", *Nt, dE, N_atoms);
-//				getchar();
-//			}
-
-			// --------------- compute time-dependent features ----------
-			E_current += dE;
-
-			clear_clusters(cluster_element_inds, cluster_sizes, &N_clusters_current);
-			uncheck_state(is_checked, N_atoms);
-			cluster_state_C(X, R, lmd2, N_atoms, cluster_element_inds, cluster_sizes, &N_clusters_current, is_checked);
-			biggest_cluster_sizes_current = max(cluster_sizes, N_clusters_current);
-
 			++(*Nt);
 
 			if(verbose){
@@ -276,6 +297,7 @@ namespace VdW
 //					fflush(stdout);
 //				}
 				if(!(*Nt % 10000)){
+					print_state(X, N_atoms, 'p');
 					if(Nt_max > 0){
 						printf("BF run: %lf %%            \r", (double)(*Nt) / (Nt_max) * 100);
 					} else {
@@ -285,27 +307,55 @@ namespace VdW
 				}
 			}
 
-			// ------------------ save timeevol ----------------
-			if(OP_arr_len){
-				if(*Nt >= *OP_arr_len){ // double the size of the time-index
-					*OP_arr_len *= 2;
-					if(E){
-						*E = (double*) realloc (*E, sizeof(double) * *OP_arr_len);
-						assert(*E);
-					}
-					if(biggest_cluster_sizes){
-						*biggest_cluster_sizes = (int*) realloc (*biggest_cluster_sizes, sizeof(int) * *OP_arr_len);
-						assert(*biggest_cluster_sizes);
-					}
-
-					if(verbose >= 2){
-						printf("\nrealloced to %ld\n", *OP_arr_len);
-					}
-				}
-
-				if(E) (*E)[*Nt - 1] = E_current;
-				if(biggest_cluster_sizes) (*biggest_cluster_sizes)[*Nt - 1] = biggest_cluster_sizes_current;
+			// --------------- compute time-dependent features ----------
+			if(timestep_to_save_E == 1){
+				E_current += dE;
 			}
+
+			if(*Nt % timestep_to_save_E == 0){
+				// ------------------ save timeevol ----------------
+				if(OP_arr_len){
+					if(*N_E_saved >= *OP_arr_len){ // double the size of the time-index
+						*OP_arr_len *= 2;
+						if(E){
+							*E = (double*) realloc (*E, sizeof(double) * *OP_arr_len);
+							assert(*E);
+						}
+						if(biggest_cluster_sizes){
+							*biggest_cluster_sizes = (int*) realloc (*biggest_cluster_sizes, sizeof(int) * *OP_arr_len);
+							assert(*biggest_cluster_sizes);
+						}
+						if(saved_states){
+							*saved_states = (double*) realloc(*saved_states, sizeof(double) * dim * N_atoms * (*OP_arr_len));
+							assert(saved_states);
+						}
+
+						if(verbose >= 2){
+							printf("\nrealloced to %ld\n", *OP_arr_len);
+						}
+					}
+
+					if(E) {
+						if(timestep_to_save_E > 1){
+							E_current = comp_E(X, R, lmd2, N_atoms);
+						}
+						(*E)[*N_E_saved] = E_current;
+					}
+					if(biggest_cluster_sizes) {
+						clear_clusters(cluster_element_inds, cluster_sizes, &N_clusters_current);
+						uncheck_state(is_checked, N_atoms);
+						cluster_state_C(X, R, lmd2, N_atoms, cluster_element_inds, cluster_sizes, &N_clusters_current, is_checked);
+						biggest_cluster_sizes_current = max(cluster_sizes, N_clusters_current);
+
+						(*biggest_cluster_sizes)[*N_E_saved] = biggest_cluster_sizes_current;
+					}
+					if(saved_states){
+						memcpy(&((*saved_states)[(*N_E_saved) * dim * N_atoms]), X, sizeof(double) * dim * N_atoms);
+					}
+					++(*N_E_saved);
+				}
+			}
+
 //			if(verbose >= 4) printf("done Nt=%d\n", *Nt-1);
 
 			// ---------------- check exit ------------------
@@ -325,7 +375,7 @@ namespace VdW
 		}
 	}
 
-	void cluster_state_C(const double *X, double R, double lmd2, int N_atoms, int *cluster_element_inds, int *cluster_sizes, int *N_clusters, int *is_checked)
+	void cluster_state_C(const double *X, const double *R, double lmd2, int N_atoms, int *cluster_element_inds, int *cluster_sizes, int *N_clusters, int *is_checked)
 	{
 		*N_clusters = 0;
 		int N_clustered_elements = 0;
@@ -340,7 +390,7 @@ namespace VdW
 
 	}
 
-	void add_to_cluster(const double* X, double R, double lmd2, int N_atoms, int* is_checked, int* cluster, int* cluster_size, int i_atom, int cluster_label)
+	void add_to_cluster(const double* X, const double *R, double lmd2, int N_atoms, int* is_checked, int* cluster, int* cluster_size, int i_atom, int cluster_label)
 	{
 		if(!is_checked[i_atom]){
 			is_checked[i_atom] = cluster_label;
@@ -374,7 +424,7 @@ namespace VdW
 		*N_clusters = 0;
 	}
 
-	double comp_E(const double * X, double R, double lmd2, int N_atoms)
+	double comp_E(const double * X, const double *R, double lmd2, int N_atoms)
 	{
 		int i, j, i3;
 		double dr2;
@@ -390,7 +440,7 @@ namespace VdW
 		return E;
 	}
 
-	bool X_fits_in(const double *X_new, const double *X_present, int N_atoms_present, double R, double r2_min)
+	bool X_fits_in(const double *X_new, const double *X_present, int N_atoms_present, const double *R, double r2_min)
 	{
 		for(int i = 0; i < N_atoms_present; ++i){
 			if(dist2(X_new, &(X_present[i * dim]), R) <= r2_min){
@@ -400,13 +450,28 @@ namespace VdW
 		return true;
 	}
 
-	void generate_state(double *X, double L, int N_atoms, int gen_mode, int verbose)
+	void generate_state(double *X, const double *L, int N_atoms, int gen_mode, double gen_density, int verbose)
 	{
 		int i;
-//		double V = powi(L, dim);
-		int N_l = int(ceil(pow(N_atoms, 1.0/dim)) + 0.1);
-		double l_step = L / N_l;
-		double R = L / 2;
+
+		double Lz_solid_init;
+		if(gen_mode == gen_mode_ID_cubic_lattice){
+			gen_density = N_atoms / (L[0] * L[1] * L[2]);
+			Lz_solid_init = L[2];
+		} else if(gen_mode == gen_mode_ID_solidUvacuum){
+			Lz_solid_init = N_atoms / (L[0] * L[1] * gen_density);
+		}
+		double a_lattice = pow(gen_density, -1.0/dim);
+
+		int Nx = int(ceil(L[0] / a_lattice) + 0.1);
+		int Ny = int(ceil(L[1] / a_lattice) + 0.1);
+		int Nz = int(ceil(Lz_solid_init / a_lattice) + 0.1);
+
+		double R[3];
+		assign_to_3D(R, L);
+		mult_by_3D(R, 0.5);
+
+		printf("R=(%lf,%lf,%lf), a=%lf\n", R[0], R[1], R[2], a_lattice);
 
 		switch (gen_mode) {
 			case gen_mode_ID_random:
@@ -419,19 +484,22 @@ namespace VdW
 					memcpy(&(X[i * dim]), X_new, sizeof(double) * dim);
 				}
 				break;
+			case gen_mode_ID_solidUvacuum:
 			case gen_mode_ID_cubic_lattice:
 				int ix, iy, iz;
-				for(ix = 0; ix < N_l; ++ix) for(iy = 0; iy < N_l; ++iy) for(iz = 0; iz < N_l; ++iz) {
-					i = (iz + N_l * (iy + N_l * ix)) * dim;
-					X[i] = ix * l_step;
-					X[i + 1] = iy * l_step;
-					X[i + 2] = iz * l_step;
+				for(iz = 0; iz < Nz; ++iz) for(iy = 0; iy < Ny; ++iy) for(ix = 0; ix < Nx; ++ix) {
+					i = ((iz * Ny + iy) * Nx + ix) * dim;
+					if(i < N_atoms * dim){
+						X[i] = ix * a_lattice;
+						X[i + 1] = iy * a_lattice;
+						X[i + 2] = iz * a_lattice;
+					}
 				}
 				break;
 		}
 	}
 
-	double get_Ei(double *X, double R, double lmd2, int N_atoms, int i_atom, double *X_atom)
+	double get_Ei(double *X, const double *R, double lmd2, int N_atoms, int i_atom, double *X_atom)
 	{
 		double E = 0;
 		int i;
@@ -457,7 +525,7 @@ namespace VdW
 		return E;
 	}
 
-	double get_dE_atom(double *X, double L, double R, double lmd2, int N_atoms, int i_atom, double *dX)
+	double get_dE_atom(double *X, const double *L, const double *R, double lmd2, int N_atoms, int i_atom, double *dX)
 	{
 		double *X_atom = &(X[dim * i_atom]);
 		double E_old = get_Ei(X, R, lmd2, N_atoms, i_atom, X_atom);
@@ -476,7 +544,7 @@ namespace VdW
 		return E_new - E_old;
 	}
 
-	double flip_random_particle(double *X, double L, double R, double lmd2, double dl, double Temp, int N_atoms, int* i_atom)
+	double flip_random_particle(double *X, const double *L, const double *R, double lmd2, double dl, double Temp, int N_atoms, int* i_atom)
 	{
 //		int i_atom;
 		double dX[dim];
